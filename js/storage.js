@@ -1,6 +1,5 @@
-// Persistencia en localStorage
 const Storage = {
-  KEY: 'ruleta_opciones_v1',
+  KEY: 'ruleta_multiple_v2', // Subí la versión por si acaso
 
   guardar(state) {
     localStorage.setItem(this.KEY, JSON.stringify(state.exportar()));
@@ -20,13 +19,10 @@ const Storage = {
   },
 
   exportarArchivo(state) {
-    const blob = new Blob(
-      [JSON.stringify(state.exportar(), null, 2)],
-      { type: 'application/json' }
-    );
+    const blob = new Blob([JSON.stringify(state.exportar(), null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'ruleta.json';
+    a.download = 'ruletas.json';
     a.click();
     URL.revokeObjectURL(a.href);
   },
@@ -36,8 +32,7 @@ const Storage = {
     reader.onload = e => {
       try {
         const data = JSON.parse(e.target.result);
-        if (state.importar(data)) callback(true);
-        else callback(false);
+        callback(state.importar(data));
       } catch (err) {
         callback(false);
       }

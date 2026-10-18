@@ -1,7 +1,7 @@
-const CACHE_VERSION = 'ruleta-v1';
+// Service Worker — Ruleta PWA
+const CACHE_VERSION = 'ruleta-v3';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 
-// Recursos que se cachean al instalar
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -19,7 +19,6 @@ const PRECACHE_URLS = [
   './icons/apple-touch-icon.png'
 ];
 
-// INSTALL → precachea todo
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_STATIC)
@@ -28,7 +27,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// ACTIVATE → limpia versiones viejas
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -41,18 +39,11 @@ self.addEventListener('activate', event => {
   );
 });
 
-// FETCH → cache-first, con fallback a offline.html
 self.addEventListener('fetch', event => {
   const req = event.request;
-
-  // Solo GET
   if (req.method !== 'GET') return;
 
-  // Ignora requests a otros orígenes
-  const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
-
-  // Navegación (HTML) → network-first con fallback a cache / offline
+  // Navegación
   if (req.mode === 'navigate') {
     event.respondWith(
       fetch(req)
@@ -69,13 +60,12 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Resto de assets → cache-first
+  // Assets (incluye CDN de Reicon y fuentes)
   event.respondWith(
     caches.match(req).then(cached => {
       if (cached) return cached;
       return fetch(req).then(res => {
-        // Cachea solo respuestas válidas del mismo origen
-        if (res && res.status === 200 && res.type === 'basic') {
+        if (res && res.status === 200) {
           const copy = res.clone();
           caches.open(CACHE_STATIC).then(c => c.put(req, copy));
         }
@@ -83,9 +73,4 @@ self.addEventListener('fetch', event => {
       });
     })
   );
-});
-
-// Mensajes desde la app (para forzar actualización)
-self.addEventListener('message', event => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });

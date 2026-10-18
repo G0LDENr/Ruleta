@@ -13,26 +13,27 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ruleta">
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon.png">
+  <link rel="icon" type="image/png" href="icons/icon.png">
 
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <h1>Ruleta de Opciones</h1>
+  <header class="app-header">
+    <h1 id="tituloRuleta">Ruleta</h1>
+  </header>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="ruleta">Ruleta</button>
-    <button class="tab" data-tab="lista">Opciones</button>
-  </div>
-
+  <!-- ===== VISTA: RULETA ===== -->
   <section class="view active" id="view-ruleta">
     <div class="wheel-wrap">
       <div class="pointer"></div>
       <canvas id="wheel" width="400" height="400"></canvas>
     </div>
-    <button class="spin-btn" id="spinBtn">GIRAR</button>
+    
+    <button class="spin-btn" id="spinBtn">
+      <re-icon icon="refresh" size="20"></re-icon> GIRAR
+    </button>
 
     <div class="hist">
       <h3>HISTORIAL</h3>
@@ -40,22 +41,59 @@
     </div>
   </section>
 
-  <section class="view" id="view-lista">
+  <!-- ===== VISTA: OPCIONES ===== -->
+  <section class="view" id="view-opciones">
     <div class="add-row">
       <input id="nuevaOpcion" placeholder="Nueva opción..." maxlength="40">
-      <button id="addBtn">+</button>
+      <button id="addBtn"><re-icon icon="plus" size="20"></re-icon></button>
     </div>
     <ul id="lista"></ul>
     <div class="actions">
-      <button id="saveBtn">Guardar</button>
-      <button id="loadBtn">Cargar</button>
-      <button id="exportBtn">Exportar</button>
-      <button id="importBtn">Importar</button>
-      <button id="clearBtn">Limpiar</button>
+      <button id="clearBtn">
+        <re-icon icon="trash" size="16"></re-icon> Limpiar opciones
+      </button>
     </div>
-    <input type="file" id="fileInput" accept="application/json" hidden>
   </section>
 
+  <!-- ===== VISTA: RULETAS (guardadas) ===== -->
+  <section class="view" id="view-ruletas">
+    <div class="add-row">
+      <input id="nombreRuleta" placeholder="Nombre de la ruleta..." maxlength="40">
+      <button id="crearRuletaBtn"><re-icon icon="plus" size="20"></re-icon></button>
+    </div>
+
+    <p class="hint">Guarda varias ruletas y cárgalas cuando quieras.</p>
+
+    <ul id="listaRuletas"></ul>
+
+    <div class="actions">
+      <button id="exportAllBtn">
+        <re-icon icon="download" size="16"></re-icon> Exportar
+      </button>
+      <button id="importAllBtn">
+        <re-icon icon="upload" size="16"></re-icon> Importar
+      </button>
+    </div>
+    <input type="file" id="fileInputAll" accept="application/json" hidden>
+  </section>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="ruleta">
+      <re-icon icon="target" size="24"></re-icon>
+      <span class="nav-label">Ruleta</span>
+    </button>
+    <button class="nav-item" data-tab="opciones">
+      <re-icon icon="settings" size="24"></re-icon>
+      <span class="nav-label">Opciones</span>
+    </button>
+    <button class="nav-item" data-tab="ruletas">
+      <re-icon icon="folder" size="24"></re-icon>
+      <span class="nav-label">Ruletas</span>
+    </button>
+  </nav>
+
+  <!-- Modal Ganador -->
   <div class="modal-bg" id="modalBg">
     <div class="modal">
       <div class="label">Resultado</div>
@@ -64,6 +102,35 @@
     </div>
   </div>
 
+  <!-- NUEVO: Contenedor de Toasts -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- NUEVO: Modal de Confirmación -->
+  <div class="modal-bg" id="confirmBg">
+    <div class="modal confirm-modal">
+      <div class="label" id="confirmTitle">Confirmar</div>
+      <p class="confirm-msg" id="confirmMsg">¿Estás seguro?</p>
+      <div class="confirm-actions">
+        <button id="confirmNo" class="btn-ghost">Cancelar</button>
+        <button id="confirmYes" class="btn-danger">Sí, continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUEVO: Modal de Prompt (para renombrar) -->
+  <div class="modal-bg" id="promptBg">
+    <div class="modal">
+      <div class="label">Renombrar</div>
+      <input type="text" id="promptInput" class="prompt-input" maxlength="40">
+      <div class="confirm-actions">
+        <button id="promptNo" class="btn-ghost">Cancelar</button>
+        <button id="promptYes" class="btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/reicon@latest/cdn/reicon.js"></script>
   <script src="js/state.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/wheel.js"></script>

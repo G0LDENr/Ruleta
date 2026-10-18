@@ -35,13 +35,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "shortcuts": [
-    {
-      "name": "Girar ahora",
-      "short_name": "Girar",
-      "url": "./index.html?action=spin",
-      "icons": [{ "src": "icons/icon.png", "sizes": "192x192" }]
-    }
   ]
 }

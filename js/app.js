@@ -1,118 +1,172 @@
-
-PWA.init();
-
 (function () {
   'use strict';
 
-  // Init
   Wheel.init();
   Storage.cargar(State);
+  State.init();
+  PWA.init();
   refrescarTodo();
 
-  // --- Refrescos ---
   function refrescarTodo() {
+    UI.renderHeader(State);
     UI.renderLista(State);
     UI.renderHistorial(State);
+    UI.renderRuletas(State);
     Wheel.dibujar(State);
   }
 
-  function refrescarRuleta() {
+  function refrescarRuletaYHeader() {
+    UI.renderHeader(State);
     Wheel.dibujar(State);
+    UI.renderHistorial(State);
   }
 
-  // --- Tabs ---
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => UI.cambiarTab(tab.dataset.tab));
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => UI.cambiarTab(btn.dataset.tab));
   });
 
-  // --- Añadir opción ---
   const inputNueva = document.getElementById('nuevaOpcion');
   document.getElementById('addBtn').addEventListener('click', agregar);
-  inputNueva.addEventListener('keydown', e => {
-    if (e.key === 'Enter') agregar();
-  });
+  inputNueva.addEventListener('keydown', e => { if (e.key === 'Enter') agregar(); });
 
   function agregar() {
     if (State.agregarOpcion(inputNueva.value)) {
       inputNueva.value = '';
       Storage.guardar(State);
       UI.renderLista(State);
-      refrescarRuleta();
+      UI.renderRuletas(State);
+      Wheel.dibujar(State);
       inputNueva.focus();
     }
   }
 
-  // --- Eliminar opción (delegación de eventos) ---
   document.getElementById('lista').addEventListener('click', e => {
-    if (!e.target.classList.contains('del-btn')) return;
-    const i = parseInt(e.target.dataset.index, 10);
-    State.eliminarOpcion(i);
+    const btn = e.target.closest('.del-btn');
+    if (!btn) return;
+    State.eliminarOpcion(parseInt(btn.dataset.index, 10));
     Storage.guardar(State);
     UI.renderLista(State);
-    refrescarRuleta();
+    UI.renderRuletas(State);
+    Wheel.dibujar(State);
   });
 
-  // --- Girar ---
   const spinBtn = document.getElementById('spinBtn');
   spinBtn.addEventListener('click', () => {
+    const r = State.getRuletaActiva();
+    if (!r) return;
+    if (r.opciones.length < 2) { 
+      UI.toast('Añade al menos 2 opciones para girar', 'error'); 
+      return; 
+    }
+    
     spinBtn.disabled = true;
     Wheel.girar(State, ganador => {
       spinBtn.disabled = false;
       State.agregarHistorial(ganador);
       Storage.guardar(State);
       UI.renderHistorial(State);
+      UI.renderRuletas(State);
       UI.mostrarGanador(ganador);
     });
   });
 
-  // --- Guardar / Cargar / Export / Import / Clear ---
-  document.getElementById('saveBtn').addEventListener('click', () => {
-    Storage.guardar(State);
-    alert('✅ Guardado en este navegador');
-  });
-
-  document.getElementById('loadBtn').addEventListener('click', () => {
-    if (Storage.cargar(State)) {
-      refrescarTodo();
-      alert('📂 Cargado');
-    } else {
-      alert('No hay nada guardado');
+  document.getElementById('clearBtn').addEventListener('click', async () => {
+    // Usamos el nuevo modal de confirmación
+    const seguro = await UI.confirmar('Limpiar opciones', '¿Estás seguro de que quieres borrar todas las opciones de esta ruleta?');
+    if (seguro) {
+      State.limpiarOpciones();
+      Storage.guardar(State);
+      UI.renderLista(State);
+      UI.renderRuletas(State);
+      Wheel.dibujar(State);
+      UI.toast('Opciones limpiadas', 'success');
     }
   });
 
-  document.getElementById('exportBtn').addEventListener('click', () => {
+  const inputNombre = document.getElementById('nombreRuleta');
+  document.getElementById('crearRuletaBtn').addEventListener('click', crearRuleta);
+  inputNombre.addEventListener('keydown', e => { if (e.key === 'Enter') crearRuleta(); });
+
+  function crearRuleta() {
+    const nombre = inputNombre.value.trim();
+    if (!nombre) {
+      UI.toast('Escribe un nombre para la ruleta', 'error');
+      return;
+    }
+    const r = State.crearRuleta(nombre);
+    State.activarRuleta(r.id);
+    inputNombre.value = '';
+    Storage.guardar(State);
+    UI.renderRuletas(State);
+    refrescarRuletaYHeader();
+    UI.cambiarTab('ruleta');
+    UI.toast(`Ruleta "${nombre}" creada`, 'success');
+  }
+
+  document.getElementById('listaRuletas').addEventListener('click', async e => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    const r = State.ruletas.find(x => x.id === id);
+    if (!r) return;
+
+    if (action === 'activar') {
+      State.activarRuleta(id);
+      Storage.guardar(State);
+      UI.renderRuletas(State);
+      refrescarRuletaYHeader();
+      UI.cambiarTab('ruleta');
+    }
+
+    if (action === 'renombrar') {
+      // Usamos el nuevo modal de Prompt
+      const nuevo = await UI.prompt('Renombrar ruleta', r.nombre);
+      if (nuevo !== null && nuevo.trim() !== '') {
+        State.renombrarRuleta(id, nuevo);
+        Storage.guardar(State);
+        UI.renderRuletas(State);
+        UI.renderHeader(State);
+        UI.toast('Nombre actualizado', 'success');
+      }
+    }
+
+    if (action === 'eliminar') {
+      // Usamos el nuevo modal de Confirmación
+      const seguro = await UI.confirmar('Eliminar ruleta', `¿Estás seguro de que quieres eliminar "${r.nombre}"? Esta acción no se puede deshacer.`);
+      if (seguro) {
+        State.eliminarRuleta(id);
+        Storage.guardar(State);
+        UI.renderRuletas(State);
+        refrescarRuletaYHeader();
+        UI.renderLista(State);
+        UI.toast('Ruleta eliminada', 'success');
+      }
+    }
+  });
+
+  document.getElementById('exportAllBtn').addEventListener('click', () => {
     Storage.exportarArchivo(State);
+    UI.toast('Archivo exportado', 'success');
   });
+  
+  document.getElementById('importAllBtn').addEventListener('click', () => document.getElementById('fileInputAll').click());
 
-  document.getElementById('importBtn').addEventListener('click', () => {
-    document.getElementById('fileInput').click();
-  });
-
-  document.getElementById('fileInput').addEventListener('change', e => {
+  document.getElementById('fileInputAll').addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
     Storage.importarArchivo(file, State, ok => {
       if (ok) {
         Storage.guardar(State);
         refrescarTodo();
-        alert('⬆ Importado');
+        UI.toast('Ruletas importadas correctamente', 'success');
       } else {
-        alert('❌ Archivo inválido');
+        UI.toast('El archivo no es válido', 'error');
       }
       e.target.value = '';
     });
   });
 
-  document.getElementById('clearBtn').addEventListener('click', () => {
-    if (confirm('¿Borrar todas las opciones?')) {
-      State.limpiarOpciones();
-      Storage.guardar(State);
-      UI.renderLista(State);
-      refrescarRuleta();
-    }
-  });
-
-  // --- Cerrar modal ---
   document.getElementById('closeModal').addEventListener('click', UI.cerrarModal);
   document.getElementById('modalBg').addEventListener('click', e => {
     if (e.target.id === 'modalBg') UI.cerrarModal();
