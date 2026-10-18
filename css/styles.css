@@ -5,7 +5,7 @@ body {
   background: #0f0f14;
   color: #eee;
   min-height: 100vh;
-  padding: 16px 16px 96px; /* Espacio para el nav inferior */
+  padding: 16px 16px 96px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -55,10 +55,21 @@ li {
   padding: 12px; background: #1c1c26; border-radius: 8px;
   margin-bottom: 6px; border-left: 4px solid #ff3b6b;
 }
+
+/* Editar opciones */
+.opcion-texto { flex: 1; cursor: pointer; padding: 4px 0; word-break: break-word; }
+.opcion-texto:hover { color: #ff3b6b; }
+
+.acciones-opcion { display: flex; gap: 4px; }
+
+li button.edit-btn, 
 li button.del-btn {
-  background: transparent; border: none; color: #ff6b8a;
-  cursor: pointer; display: flex; align-items: center; padding: 4px;
+  background: transparent; border: none; color: #aaa; cursor: pointer;
+  display: flex; align-items: center; padding: 4px; border-radius: 4px;
 }
+li button.edit-btn:hover { color: #3b8bff; background: #2a2a3a; }
+li button.del-btn:hover { color: #ff3b6b; background: #2a2a3a; }
+
 .empty { color: #666; text-align: center; padding: 20px; font-style: italic; }
 
 /* ===== RULETAS GUARDADAS ===== */
@@ -73,7 +84,8 @@ li button.del-btn {
 .ruleta-item .info { flex: 1; min-width: 0; }
 .ruleta-item .nombre { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ruleta-item .meta { font-size: .75rem; color: #888; }
-.ruleta-item .acciones { display: flex; gap: 4px; }
+
+.ruleta-item .acciones { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
 .ruleta-item button.icon {
   background: transparent; border: none; color: #ccc; cursor: pointer;
   padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
@@ -81,6 +93,10 @@ li button.del-btn {
 .ruleta-item button.icon:hover { background: #2f2f3d; }
 .ruleta-item button.icon.activo { color: #ff3b6b; }
 .ruleta-item button.icon.peligro { color: #ff6b8a; }
+
+/* NUEVO: Estilo para el icono de descarga */
+.ruleta-item button.icon.descarga { color: #3bff9e; }
+.ruleta-item button.icon.descarga:hover { background: #2a2a3a; }
 
 /* ===== ACCIONES ===== */
 .actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
@@ -105,14 +121,8 @@ li button.del-btn {
   position: fixed; inset: 0; background: rgba(0,0,0,.8);
   display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px;
 }
-.modal-bg.show { 
-  display: flex; 
-}
-.modal { 
-  background: #1c1c26; 
-  padding: 32px; 
-  border-radius: 16px; 
-  text-align: center; max-width: 320px; width: 100%; border: 2px solid #ff3b6b; }
+.modal-bg.show { display: flex; }
+.modal { background: #1c1c26; padding: 32px; border-radius: 16px; text-align: center; max-width: 320px; width: 100%; border: 2px solid #ff3b6b; }
 .modal .label { font-size: .8rem; color: #888; text-transform: uppercase; letter-spacing: 2px; }
 .modal .winner { font-size: 1.8rem; font-weight: 800; color: #ff3b6b; margin: 16px 0; word-break: break-word; }
 .modal button { width: 100%; padding: 12px; background: #ff3b6b; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
@@ -131,123 +141,34 @@ li button.del-btn {
 .nav-item.active { color: #ff3b6b; }
 re-icon { display: flex; align-items: center; justify-content: center; }
 
-body.standalone { padding-top: max(16px, env(safe-area-inset-top)); }
-
-/* ... (TODOS TUS ESTILOS ANTERIORES SE MANTIENEN IGUAL HASTA AQUÍ) ... */
-
-/* ===== NUEVOS ESTILOS: TOASTS Y MODALES ===== */
-
-/* Toasts */
+/* ===== TOASTS Y MODALES NUEVOS ===== */
 .toast-container {
-  position: fixed;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 1000;
-  pointer-events: none;
-  width: 90%;
-  max-width: 400px;
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; gap: 8px; z-index: 1000;
+  pointer-events: none; width: 90%; max-width: 400px;
 }
-
 .toast {
-  background: #1c1c26;
-  color: white;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-left: 4px solid #ff3b6b;
-  animation: slideDown 0.3s ease forwards;
-  pointer-events: auto;
+  background: #1c1c26; color: white; padding: 12px 16px; border-radius: 8px;
+  font-size: 0.9rem; font-weight: 500; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  display: flex; align-items: center; gap: 10px; border-left: 4px solid #ff3b6b;
+  animation: slideDown 0.3s ease forwards; pointer-events: auto;
 }
-
 .toast.success { border-left-color: #3bff9e; }
 .toast.error { border-left-color: #ff3b6b; }
 .toast.info { border-left-color: #3b8bff; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+.toast.fade-out { animation: fadeOut 0.3s ease forwards; }
+@keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
 
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.toast.fade-out {
-  animation: fadeOut 0.3s ease forwards;
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-20px); }
-}
-
-/* Modal Confirm / Prompt */
 .confirm-modal, .prompt-modal { padding: 24px 20px; }
-.confirm-msg {
-  font-size: 1rem;
-  color: #ccc;
-  margin: 16px 0 24px;
-  line-height: 1.4;
-}
-
-.confirm-actions {
-  display: flex;
-  gap: 8px;
-  width: 100%;
-}
-
-.btn-ghost {
-  flex: 1;
-  padding: 12px;
-  background: transparent;
-  color: #aaa;
-  border: 1px solid #3a3a4a;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-}
+.confirm-msg { font-size: 1rem; color: #ccc; margin: 16px 0 24px; line-height: 1.4; }
+.confirm-actions { display: flex; gap: 8px; width: 100%; }
+.btn-ghost { flex: 1; padding: 12px; background: transparent; color: #aaa; border: 1px solid #3a3a4a; border-radius: 8px; font-weight: 600; cursor: pointer; }
 .btn-ghost:hover { background: #2a2a3a; }
-
-.btn-danger {
-  flex: 1;
-  padding: 12px;
-  background: #ff3b6b;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-}
+.btn-danger { flex: 1; padding: 12px; background: #ff3b6b; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
 .btn-danger:hover { background: #e02e5b; }
-
-.btn-primary {
-  flex: 1;
-  padding: 12px;
-  background: #3b8bff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-}
+.btn-primary { flex: 1; padding: 12px; background: #3b8bff; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
 .btn-primary:hover { background: #2e6cd4; }
-
-.prompt-input {
-  width: 100%;
-  padding: 12px;
-  background: #0f0f14;
-  border: 1px solid #3a3a4a;
-  border-radius: 8px;
-  color: white;
-  font-size: 1rem;
-  margin: 16px 0;
-}
-.prompt-input:focus {
-  outline: none;
-  border-color: #ff3b6b;
-}
+.prompt-input { width: 100%; padding: 12px; background: #0f0f14; border: 1px solid #3a3a4a; border-radius: 8px; color: white; font-size: 1rem; margin: 16px 0; }
+.prompt-input:focus { outline: none; border-color: #ff3b6b; }
+body.standalone { padding-top: max(16px, env(safe-area-inset-top)); }

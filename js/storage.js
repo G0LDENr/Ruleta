@@ -1,5 +1,5 @@
 const Storage = {
-  KEY: 'ruleta_multiple_v2', // Subí la versión por si acaso
+  KEY: 'ruleta_multiple_v3', // Subí la versión por si acaso
 
   guardar(state) {
     localStorage.setItem(this.KEY, JSON.stringify(state.exportar()));

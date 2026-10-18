@@ -3,21 +3,18 @@ const UI = {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   },
 
-  // ===== NUEVO: SISTEMA DE TOASTS =====
   toast(mensaje, tipo = 'info') {
     const container = document.getElementById('toastContainer');
     const el = document.createElement('div');
     el.className = `toast ${tipo}`;
     el.innerHTML = `<span>${this.escapeHtml(mensaje)}</span>`;
     container.appendChild(el);
-
     setTimeout(() => {
       el.classList.add('fade-out');
       el.addEventListener('animationend', () => el.remove());
     }, 3000);
   },
 
-  // ===== NUEVO: MODAL DE CONFIRMACIÓN =====
   confirmar(titulo, mensaje) {
     return new Promise((resolve) => {
       const modal = document.getElementById('confirmBg');
@@ -27,7 +24,6 @@ const UI = {
       const btnYes = document.getElementById('confirmYes');
       const btnNo = document.getElementById('confirmNo');
 
-      // Limpiamos eventos viejos clonando
       const newBtnYes = btnYes.cloneNode(true);
       const newBtnNo = btnNo.cloneNode(true);
       btnYes.replaceWith(newBtnYes);
@@ -40,13 +36,11 @@ const UI = {
     });
   },
 
-  // ===== NUEVO: MODAL DE PROMPT (Renombrar) =====
   prompt(titulo, valorInicial) {
     return new Promise((resolve) => {
       const modal = document.getElementById('promptBg');
       const input = document.getElementById('promptInput');
       
-      // Actualizamos el título del modal de prompt
       modal.querySelector('.label').textContent = titulo;
       input.value = valorInicial;
 
@@ -66,7 +60,6 @@ const UI = {
     });
   },
 
-  // ===== RESTO DE FUNCIONES =====
   renderLista(state) {
     const ul = document.getElementById('lista');
     const r = state.getRuletaActiva();
@@ -80,10 +73,15 @@ const UI = {
     r.opciones.forEach((op, i) => {
       const li = document.createElement('li');
       li.innerHTML = `
-        <span>${this.escapeHtml(op)}</span>
-        <button class="del-btn" data-index="${i}">
-          <re-icon icon="trash" size="18"></re-icon>
-        </button>
+        <span class="opcion-texto" data-index="${i}" title="Clic para editar">${this.escapeHtml(op)}</span>
+        <div class="acciones-opcion">
+          <button class="edit-btn" data-index="${i}" title="Editar">
+            <re-icon icon="edit" size="16"></re-icon>
+          </button>
+          <button class="del-btn" data-index="${i}" title="Eliminar">
+            <re-icon icon="trash" size="16"></re-icon>
+          </button>
+        </div>
       `;
       ul.appendChild(li);
     });
@@ -108,6 +106,7 @@ const UI = {
     }).join('');
   },
 
+  // AQUI ESTA EL CAMBIO: Botón de descargar con icono
   renderRuletas(state) {
     const ul = document.getElementById('listaRuletas');
     ul.innerHTML = '';
@@ -133,6 +132,12 @@ const UI = {
           <button class="icon" data-action="renombrar" data-id="${r.id}" title="Renombrar">
             <re-icon icon="edit" size="18"></re-icon>
           </button>
+          
+          <!-- CAMBIO: Icono de descarga verde -->
+          <button class="icon descarga" data-action="descargar" data-id="${r.id}" title="Descargar esta ruleta">
+            <re-icon icon="arrow-down" size="18"></re-icon>
+          </button>
+
           <button class="icon peligro" data-action="eliminar" data-id="${r.id}" title="Eliminar">
             <re-icon icon="trash" size="18"></re-icon>
           </button>

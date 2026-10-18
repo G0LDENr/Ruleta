@@ -66,12 +66,10 @@
 
     <ul id="listaRuletas"></ul>
 
+    <!-- CAMBIO: Solo queda el botón de Agregar -->
     <div class="actions">
-      <button id="exportAllBtn">
-        <re-icon icon="download" size="16"></re-icon> Exportar
-      </button>
       <button id="importAllBtn">
-        <re-icon icon="upload" size="16"></re-icon> Importar
+        <re-icon icon="upload" size="16"></re-icon> Agregar Ruleta
       </button>
     </div>
     <input type="file" id="fileInputAll" accept="application/json" hidden>
@@ -102,10 +100,10 @@
     </div>
   </div>
 
-  <!-- NUEVO: Contenedor de Toasts -->
+  <!-- Contenedor de Toasts -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- NUEVO: Modal de Confirmación -->
+  <!-- Modal de Confirmación -->
   <div class="modal-bg" id="confirmBg">
     <div class="modal confirm-modal">
       <div class="label" id="confirmTitle">Confirmar</div>
@@ -117,7 +115,7 @@
     </div>
   </div>
 
-  <!-- NUEVO: Modal de Prompt (para renombrar) -->
+  <!-- Modal de Prompt (para renombrar y editar) -->
   <div class="modal-bg" id="promptBg">
     <div class="modal">
       <div class="label">Renombrar</div>

@@ -40,14 +40,35 @@
     }
   }
 
-  document.getElementById('lista').addEventListener('click', e => {
-    const btn = e.target.closest('.del-btn');
-    if (!btn) return;
-    State.eliminarOpcion(parseInt(btn.dataset.index, 10));
-    Storage.guardar(State);
-    UI.renderLista(State);
-    UI.renderRuletas(State);
-    Wheel.dibujar(State);
+  document.getElementById('lista').addEventListener('click', async e => {
+    const btnDel = e.target.closest('.del-btn');
+    if (btnDel) {
+      State.eliminarOpcion(parseInt(btnDel.dataset.index, 10));
+      Storage.guardar(State);
+      UI.renderLista(State);
+      UI.renderRuletas(State);
+      Wheel.dibujar(State);
+      return;
+    }
+
+    const btnEdit = e.target.closest('.edit-btn');
+    const textoEdit = e.target.closest('.opcion-texto');
+    
+    if (btnEdit || textoEdit) {
+      const index = parseInt((btnEdit || textoEdit).dataset.index, 10);
+      const r = State.getRuletaActiva();
+      const valorActual = r.opciones[index];
+      
+      const nuevoValor = await UI.prompt('Editar opción', valorActual);
+      
+      if (nuevoValor !== null && nuevoValor.trim() !== '' && nuevoValor !== valorActual) {
+        r.opciones[index] = nuevoValor.trim();
+        Storage.guardar(State);
+        UI.renderLista(State);
+        Wheel.dibujar(State);
+        UI.toast('Opción actualizada', 'success');
+      }
+    }
   });
 
   const spinBtn = document.getElementById('spinBtn');
@@ -71,7 +92,6 @@
   });
 
   document.getElementById('clearBtn').addEventListener('click', async () => {
-    // Usamos el nuevo modal de confirmación
     const seguro = await UI.confirmar('Limpiar opciones', '¿Estás seguro de que quieres borrar todas las opciones de esta ruleta?');
     if (seguro) {
       State.limpiarOpciones();
@@ -120,7 +140,6 @@
     }
 
     if (action === 'renombrar') {
-      // Usamos el nuevo modal de Prompt
       const nuevo = await UI.prompt('Renombrar ruleta', r.nombre);
       if (nuevo !== null && nuevo.trim() !== '') {
         State.renombrarRuleta(id, nuevo);
@@ -131,8 +150,12 @@
       }
     }
 
+    if (action === 'descargar') {
+      Storage.exportarRuletaIndividual(r);
+      UI.toast(`Ruleta "${r.nombre}" descargada`, 'success');
+    }
+
     if (action === 'eliminar') {
-      // Usamos el nuevo modal de Confirmación
       const seguro = await UI.confirmar('Eliminar ruleta', `¿Estás seguro de que quieres eliminar "${r.nombre}"? Esta acción no se puede deshacer.`);
       if (seguro) {
         State.eliminarRuleta(id);
@@ -145,11 +168,8 @@
     }
   });
 
-  document.getElementById('exportAllBtn').addEventListener('click', () => {
-    Storage.exportarArchivo(State);
-    UI.toast('Archivo exportado', 'success');
-  });
-  
+  // El botón de exportar global ya no existe, así que quitamos su listener
+
   document.getElementById('importAllBtn').addEventListener('click', () => document.getElementById('fileInputAll').click());
 
   document.getElementById('fileInputAll').addEventListener('change', e => {
@@ -159,7 +179,7 @@
       if (ok) {
         Storage.guardar(State);
         refrescarTodo();
-        UI.toast('Ruletas importadas correctamente', 'success');
+        UI.toast('Ruletas cargadas correctamente', 'success');
       } else {
         UI.toast('El archivo no es válido', 'error');
       }
