@@ -15,8 +15,10 @@
     Wheel.dibujar(State);
   }
 
+  // AQUÍ ESTÁ LA CORRECCIÓN: Agregamos renderLista para que se pinten las opciones
   function refrescarRuletaYHeader() {
     UI.renderHeader(State);
+    UI.renderLista(State); 
     Wheel.dibujar(State);
     UI.renderHistorial(State);
   }
@@ -162,13 +164,10 @@
         Storage.guardar(State);
         UI.renderRuletas(State);
         refrescarRuletaYHeader();
-        UI.renderLista(State);
         UI.toast('Ruleta eliminada', 'success');
       }
     }
   });
-
-  // El botón de exportar global ya no existe, así que quitamos su listener
 
   document.getElementById('importAllBtn').addEventListener('click', () => document.getElementById('fileInputAll').click());
 
