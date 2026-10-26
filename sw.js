@@ -1,5 +1,5 @@
 // Service Worker — Ruleta PWA
-const CACHE_VERSION = 'ruleta-v3';
+const CACHE_VERSION = 'ruleta-v3.1.0';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 
 const PRECACHE_URLS = [
