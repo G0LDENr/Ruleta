@@ -73,14 +73,36 @@ const State = {
     return { ruletas: this.ruletas, activaId: this.activaId };
   },
 
+  // AQUÍ ESTÁ LA CORRECCIÓN: Sumar en lugar de reemplazar
   importar(data) {
     if (!data || typeof data !== 'object') return false;
-    if (Array.isArray(data.ruletas)) this.ruletas = data.ruletas;
+    
+    // Si el archivo trae un arreglo de ruletas, lo recorremos
+    if (Array.isArray(data.ruletas)) {
+      data.ruletas.forEach(ruletaImportada => {
+        // Validación básica de que la ruleta tenga lo necesario
+        if (!ruletaImportada.id || !ruletaImportada.nombre || !Array.isArray(ruletaImportada.opciones)) return;
+
+        // Buscamos si ya existe una ruleta con ese mismo ID
+        const indexExistente = this.ruletas.findIndex(r => r.id === ruletaImportada.id);
+        
+        if (indexExistente !== -1) {
+          // Si ya existe, la actualizamos (por si es una versión más nueva)
+          this.ruletas[indexExistente] = ruletaImportada;
+        } else {
+          // Si no existe, la agregamos a la lista
+          this.ruletas.push(ruletaImportada);
+        }
+      });
+    }
+
+    // Seleccionamos la ruleta que venía activa en el archivo (o la primera si no hay)
     if (data.activaId && this.ruletas.some(r => r.id === data.activaId)) {
       this.activaId = data.activaId;
     } else if (this.ruletas[0]) {
       this.activaId = this.ruletas[0].id;
     }
+
     this.init();
     return true;
   }
